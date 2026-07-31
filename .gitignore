@@ -1,4 +1,4 @@
-node_modules/
+node_modules
 convoy
 dist/
 .*.bun-build

@@ -365,6 +365,7 @@ describe("agent registry", () => {
       "review-scope",
       "bug-auditor",
       "clean-code-auditor",
+      "over-engineering-auditor",
       "security-reviewer",
       "review-adversary",
       "review-fixer",
@@ -926,7 +927,7 @@ describe("materializing built-in pipelines", () => {
     const originalMember = originalGroup.parallel[0]
     if (typeof originalMember === "string") throw new Error("expected a member object")
     expect(original.steps).toHaveLength(3)
-    expect(originalGroup.parallel).toHaveLength(3)
+    expect(originalGroup.parallel).toHaveLength(4)
     expect(originalMember.models).toHaveLength(2)
     expect(originalMember.name).toBe("clean-code")
   })

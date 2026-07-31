@@ -212,6 +212,8 @@ describe("built-in review pipeline", () => {
       "scope",
       "clean-code__openai-gpt-5-6-terra-xhigh",
       "clean-code__anthropic-claude-opus-5",
+      "over-engineering__openai-gpt-5-6-terra-xhigh",
+      "over-engineering__anthropic-claude-opus-5",
       "security__openai-gpt-5-6-terra-xhigh",
       "security__anthropic-claude-opus-5",
       "bugs__openai-gpt-5-6-terra-xhigh",
@@ -225,6 +227,8 @@ describe("built-in review pipeline", () => {
       "reports/scope.md",
       "reports/clean-code__openai-gpt-5-6-terra-xhigh.md",
       "reports/clean-code__anthropic-claude-opus-5.md",
+      "reports/over-engineering__openai-gpt-5-6-terra-xhigh.md",
+      "reports/over-engineering__anthropic-claude-opus-5.md",
       "reports/security__openai-gpt-5-6-terra-xhigh.md",
       "reports/security__anthropic-claude-opus-5.md",
       "reports/bugs__openai-gpt-5-6-terra-xhigh.md",
@@ -250,6 +254,8 @@ describe("built-in review-lite pipeline", () => {
       "scope",
       "clean-code__openrouter-z-ai-glm-5-2",
       "clean-code__openrouter-moonshotai-kimi-k3",
+      "over-engineering__openrouter-z-ai-glm-5-2",
+      "over-engineering__openrouter-moonshotai-kimi-k3",
       "security__openrouter-z-ai-glm-5-2",
       "security__openrouter-moonshotai-kimi-k3",
       "bugs__openrouter-z-ai-glm-5-2",
@@ -267,6 +273,8 @@ describe("built-in review-lite pipeline", () => {
       "reports/scope.md",
       "reports/clean-code__openrouter-z-ai-glm-5-2.md",
       "reports/clean-code__openrouter-moonshotai-kimi-k3.md",
+      "reports/over-engineering__openrouter-z-ai-glm-5-2.md",
+      "reports/over-engineering__openrouter-moonshotai-kimi-k3.md",
       "reports/security__openrouter-z-ai-glm-5-2.md",
       "reports/security__openrouter-moonshotai-kimi-k3.md",
       "reports/bugs__openrouter-z-ai-glm-5-2.md",
@@ -291,9 +299,40 @@ describe("built-in refine pipeline", () => {
     expect(byName.bugs).toMatchObject({ model: "openai/gpt-5.6-terra", variant: "xhigh" })
     expect(byName["clean-code"]).toMatchObject({ model: "openai/gpt-5.6-terra", variant: "xhigh" })
     expect(byName.security).toMatchObject({ model: "openai/gpt-5.6-terra", variant: "xhigh" })
+    expect(byName["over-engineering"]).toMatchObject({ model: "openai/gpt-5.6-terra", variant: "xhigh" })
     expect(byName.triage).toMatchObject({ model: "anthropic/claude-opus-5" })
+    expect(byName.triage.inputFiles).toEqual([
+      "prd.md",
+      "reports/scope.md",
+      "reports/bugs.md",
+      "reports/clean-code.md",
+      "reports/security.md",
+      "reports/over-engineering.md",
+    ])
     expect(byName.fixes).toMatchObject({ model: "openai/gpt-5.6-terra", variant: "xhigh" })
     expect(byName.validator).toMatchObject({ model: "openai/gpt-5.6-terra", variant: "xhigh" })
+  })
+})
+
+describe("built-in ultra-refine pipeline", () => {
+  test("fans out audits across models and feeds all report files including over-engineering to triage", () => {
+    const pipeline = resolvePipeline({ name: "ultra-refine", spec: builtInPipelines["ultra-refine"]!, agents: builtInAgents })
+    const agents = pipeline.steps.filter((step): step is AgentStep => step.type === "agent")
+
+    const triage = agents.find((step) => step.name === "triage")
+    expect(triage?.inputFiles).toEqual([
+      "prd.md",
+      "reports/scope__openrouter-anthropic-claude-sonnet-5.md",
+      "reports/scope__openai-gpt-5-6-terra-xhigh.md",
+      "reports/bugs__openrouter-anthropic-claude-sonnet-5.md",
+      "reports/bugs__openai-gpt-5-6-terra-xhigh.md",
+      "reports/clean-code__openrouter-anthropic-claude-sonnet-5.md",
+      "reports/clean-code__openai-gpt-5-6-terra-xhigh.md",
+      "reports/security__openrouter-anthropic-claude-sonnet-5.md",
+      "reports/security__openai-gpt-5-6-terra-xhigh.md",
+      "reports/over-engineering__openrouter-anthropic-claude-sonnet-5.md",
+      "reports/over-engineering__openai-gpt-5-6-terra-xhigh.md",
+    ])
   })
 })
 

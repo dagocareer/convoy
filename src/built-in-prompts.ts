@@ -21,6 +21,7 @@ import implementationFixer from "../prompts/implementation-fixer.md" with { type
 import implementationTriage from "../prompts/implementation-triage.md" with { type: "text" }
 import implementationValidator from "../prompts/implementation-validator.md" with { type: "text" }
 import implementer from "../prompts/implementer.md" with { type: "text" }
+import overEngineeringAuditor from "../prompts/over-engineering-auditor.md" with { type: "text" }
 import patternAuditor from "../prompts/pattern-auditor.md" with { type: "text" }
 import reviewAdversary from "../prompts/review-adversary.md" with { type: "text" }
 import reviewFixer from "../prompts/review-fixer.md" with { type: "text" }
@@ -62,6 +63,7 @@ export const builtInPrompts: Record<string, string> = {
   "implementation-triage": implementationTriage,
   "implementation-validator": implementationValidator,
   implementer,
+  "over-engineering-auditor": overEngineeringAuditor,
   "pattern-auditor": patternAuditor,
   "review-adversary": reviewAdversary,
   "review-fixer": reviewFixer,
