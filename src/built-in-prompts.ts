@@ -11,6 +11,7 @@ import fixerValidator from "../prompts/fixer-validator.md" with { type: "text" }
 import hunterCorrectness from "../prompts/hunter-correctness.md" with { type: "text" }
 import hunterMaxReport from "../prompts/hunter-max-report.md" with { type: "text" }
 import hunterMemory from "../prompts/hunter-memory.md" with { type: "text" }
+import hunterOverEngineering from "../prompts/hunter-over-engineering.md" with { type: "text" }
 import hunterPerformance from "../prompts/hunter-performance.md" with { type: "text" }
 import hunterReliability from "../prompts/hunter-reliability.md" with { type: "text" }
 import hunterReport from "../prompts/hunter-report.md" with { type: "text" }
@@ -52,6 +53,7 @@ export const builtInPrompts: Record<string, string> = {
   "hunter-correctness": hunterCorrectness,
   "hunter-max-report": hunterMaxReport,
   "hunter-memory": hunterMemory,
+  "hunter-over-engineering": hunterOverEngineering,
   "hunter-performance": hunterPerformance,
   "hunter-reliability": hunterReliability,
   "hunter-report": hunterReport,

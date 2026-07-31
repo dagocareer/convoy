@@ -384,6 +384,7 @@ describe("agent registry", () => {
       "hunter-security",
       "hunter-reliability",
       "hunter-supply-chain",
+      "hunter-over-engineering",
       "hunter-report",
       "hunter-max-report",
     ])
