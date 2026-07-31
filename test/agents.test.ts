@@ -44,6 +44,22 @@ describe("opencode config", () => {
     expect(prompt).toContain("# Convoy Runtime Safety")
   })
 
+  test("loads debt-auditor prompt with the ledger contract and safety guard rails", () => {
+    const prompt = loadAgentPrompt("debt-auditor", "/tmp/non-existent-convoy-target")
+
+    expect(prompt).toContain("# Debt Auditor")
+    expect(prompt).toContain("audit-only phase: do not modify the repository")
+    // The ledger is sourced only from deferred / non-blocking audit findings.
+    expect(prompt).toContain("deferred")
+    // Each entry must name a re-evaluation trigger, or be marked no-trigger.
+    expect(prompt).toContain("trigger")
+    expect(prompt).toContain("no-trigger")
+    // Ledger columns and the report path.
+    expect(prompt).toContain("DEBT-N")
+    expect(prompt).toContain("reports/debt.md")
+    expect(prompt).toContain("# Convoy Runtime Safety")
+  })
+
   test("project agent prompts replace built-ins but keep runtime safety", async () => {
     const dir = await mkdtemp(join(tmpdir(), "convoy-agents-"))
     try {

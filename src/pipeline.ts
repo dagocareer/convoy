@@ -118,6 +118,14 @@ export const builtInAgents: readonly AgentSpec[] = [
     builtIn: true,
   },
   {
+    name: "debt-auditor",
+    description: "Audit-only consolidator that turns deferred audit findings into a tracked debt ledger with re-evaluation triggers",
+    defaultModel: fallbackModel,
+    temperature: 0.1,
+    readOnly: true,
+    builtIn: true,
+  },
+  {
     name: "review-adversary",
     description: "Adversarial reviewer that validates and filters audit findings before fixes",
     defaultModel: defaultOpusModel,
@@ -388,7 +396,7 @@ export const builtInPipelines: Record<string, PipelineSpec> = {
   },
   review: {
     description:
-      "Report-only PR review: scope, then parallel bug/clean-code/security/over-engineering audits across two models, then one prioritized findings report. Makes no changes.",
+      "Report-only PR review: scope, then parallel bug/clean-code/security/over-engineering audits across two models, a debt ledger of the deferred findings, then one prioritized findings report. Makes no changes.",
     steps: [
       { agent: "review-scope", name: "scope", model: defaultOpusModel, reports: "none", diff: true },
       {
@@ -399,12 +407,13 @@ export const builtInPipelines: Record<string, PipelineSpec> = {
           { agent: "bug-auditor", name: "bugs", models: [fallbackModel, defaultOpusModel], reports: ["scope"] },
         ],
       },
+      { agent: "debt-auditor", name: "debt", model: defaultOpusModel, reports: ["scope", "clean-code", "over-engineering", "security", "bugs"] },
       { agent: "review-report", name: "report", model: defaultOpusModel, reports: "all" },
     ],
   },
   "review-lite": {
     description:
-      "Like review, but every phase runs on a low-cost model: GLM 5.2 scopes and writes the report, and the audit fan-out pairs GLM 5.2 with Kimi K3 instead of Opus.",
+      "Like review, but every phase runs on a low-cost model: GLM 5.2 scopes, audits, writes the debt ledger and the report, and the audit fan-out pairs GLM 5.2 with Kimi K3 instead of Opus.",
     steps: [
       { agent: "review-scope", name: "scope", model: glmModel, reports: "none", diff: true },
       {
@@ -415,24 +424,26 @@ export const builtInPipelines: Record<string, PipelineSpec> = {
           { agent: "bug-auditor", name: "bugs", models: [glmModel, kimiModel], reports: ["scope"] },
         ],
       },
+      { agent: "debt-auditor", name: "debt", model: glmModel, reports: ["scope", "clean-code", "over-engineering", "security", "bugs"] },
       { agent: "review-report", name: "report", model: glmModel, reports: "all" },
     ],
   },
   refine: {
-    description: "Audit-only PR review, adversarial finding triage, targeted fixes, and final validation — applies changes.",
+    description: "Audit-only PR review, a debt ledger of the deferred findings, adversarial finding triage, targeted fixes, and final validation — applies changes.",
     steps: [
       { agent: "review-scope", name: "scope", model: glmModel, reports: "none", diff: true },
       { agent: "bug-auditor", name: "bugs", model: fallbackModel, reports: ["scope"] },
       { agent: "clean-code-auditor", name: "clean-code", model: fallbackModel, reports: ["scope"] },
       { agent: "security-reviewer", name: "security", model: fallbackModel, reports: ["scope"] },
       { agent: "over-engineering-auditor", name: "over-engineering", model: fallbackModel, reports: ["scope"] },
-      { agent: "review-adversary", name: "triage", model: defaultOpusModel, reports: ["scope", "bugs", "clean-code", "security", "over-engineering"] },
+      { agent: "debt-auditor", name: "debt", model: fallbackModel, reports: ["scope", "bugs", "clean-code", "security", "over-engineering"] },
+      { agent: "review-adversary", name: "triage", model: defaultOpusModel, reports: ["scope", "bugs", "clean-code", "security", "over-engineering", "debt"] },
       { agent: "review-fixer", name: "fixes", model: fallbackModel, reports: ["triage"] },
       { agent: "review-validator", name: "validator", model: fallbackModel, reports: "all" },
     ],
   },
   "ultra-refine": {
-    description: "Like refine, but every read-only audit runs in parallel across two models before triage, targeted fixes, and validation.",
+    description: "Like refine, but every read-only audit runs in parallel across two models, a debt ledger consolidates the deferred findings before triage, and validation runs on Opus.",
     steps: [
       { agent: "review-scope", name: "scope", models: [sonnetModel, fallbackModel], reports: "none", diff: true },
       {
@@ -443,7 +454,8 @@ export const builtInPipelines: Record<string, PipelineSpec> = {
           { agent: "over-engineering-auditor", name: "over-engineering", models: [sonnetModel, fallbackModel], reports: ["scope"] },
         ],
       },
-      { agent: "review-adversary", name: "triage", model: defaultOpusModel, reports: ["scope", "bugs", "clean-code", "security", "over-engineering"] },
+      { agent: "debt-auditor", name: "debt", model: fallbackModel, reports: ["scope", "bugs", "clean-code", "security", "over-engineering"] },
+      { agent: "review-adversary", name: "triage", model: defaultOpusModel, reports: ["scope", "bugs", "clean-code", "security", "over-engineering", "debt"] },
       { agent: "review-fixer", name: "fixes", model: sonnetModel, reports: ["triage"] },
       { agent: "review-validator", name: "validator", model: defaultOpusModel, reports: "all" },
     ],

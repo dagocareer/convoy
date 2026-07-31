@@ -367,6 +367,7 @@ describe("agent registry", () => {
       "clean-code-auditor",
       "over-engineering-auditor",
       "security-reviewer",
+      "debt-auditor",
       "review-adversary",
       "review-fixer",
       "review-validator",
@@ -388,6 +389,24 @@ describe("agent registry", () => {
       "hunter-report",
       "hunter-max-report",
     ])
+  })
+
+  test("debt-auditor carries the audit shape and sits between security-reviewer and review-adversary", () => {
+    const names = builtInAgents.map((agent) => agent.name)
+    const debtIndex = names.indexOf("debt-auditor")
+    expect(debtIndex).toBeGreaterThan(-1)
+    expect(names[debtIndex - 1]).toBe("security-reviewer")
+    expect(names[debtIndex + 1]).toBe("review-adversary")
+
+    const debt = builtInAgents[debtIndex]!
+    // The audit family shape: read-only, low temperature, built-in, on the fallback model.
+    expect(debt).toMatchObject({
+      temperature: 0.1,
+      readOnly: true,
+      builtIn: true,
+      defaultModel: "openai/gpt-5.6-terra#xhigh",
+    })
+    expect(debt.description).toContain("debt ledger")
   })
 })
 
@@ -926,7 +945,7 @@ describe("materializing built-in pipelines", () => {
     if (originalGroup === undefined || !isParallelSpec(originalGroup)) throw new Error("expected a parallel block")
     const originalMember = originalGroup.parallel[0]
     if (typeof originalMember === "string") throw new Error("expected a member object")
-    expect(original.steps).toHaveLength(3)
+    expect(original.steps).toHaveLength(4)
     expect(originalGroup.parallel).toHaveLength(4)
     expect(originalMember.models).toHaveLength(2)
     expect(originalMember.name).toBe("clean-code")

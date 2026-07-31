@@ -14,7 +14,7 @@ Act as a skeptical second reviewer over the audit reports. Validate which findin
 
 ## Workflow
 
-1. Read `prd.md`, `reports/scope.md`, `reports/bugs.md`, `reports/clean-code.md`, `reports/security.md`, `reports/over-engineering.md`, and the attached diff.
+1. Read `prd.md`, `reports/scope.md`, `reports/bugs.md`, `reports/clean-code.md`, `reports/security.md`, `reports/over-engineering.md`, `reports/debt.md`, and the attached diff.
 2. Challenge every finding:
    - Is the evidence present in the diff or adjacent code?
    - Is the severity justified?
