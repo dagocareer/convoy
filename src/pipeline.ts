@@ -102,6 +102,14 @@ export const builtInAgents: readonly AgentSpec[] = [
     builtIn: true,
   },
   {
+    name: "over-engineering-auditor",
+    description: "Audit-only reviewer for over-engineering, speculative generality, and scope creep risks",
+    defaultModel: fallbackModel,
+    temperature: 0.1,
+    readOnly: true,
+    builtIn: true,
+  },
+  {
     name: "security-reviewer",
     description: "Audit-only reviewer for security, privacy, and operational risks",
     defaultModel: fallbackModel,
@@ -380,12 +388,13 @@ export const builtInPipelines: Record<string, PipelineSpec> = {
   },
   review: {
     description:
-      "Report-only PR review: scope, then parallel bug/clean-code/security audits across two models, then one prioritized findings report. Makes no changes.",
+      "Report-only PR review: scope, then parallel bug/clean-code/security/over-engineering audits across two models, then one prioritized findings report. Makes no changes.",
     steps: [
       { agent: "review-scope", name: "scope", model: defaultOpusModel, reports: "none", diff: true },
       {
         parallel: [
           { agent: "clean-code-auditor", name: "clean-code", models: [fallbackModel, defaultOpusModel], reports: ["scope"] },
+          { agent: "over-engineering-auditor", name: "over-engineering", models: [fallbackModel, defaultOpusModel], reports: ["scope"] },
           { agent: "security-reviewer", name: "security", models: [fallbackModel, defaultOpusModel], reports: ["scope"] },
           { agent: "bug-auditor", name: "bugs", models: [fallbackModel, defaultOpusModel], reports: ["scope"] },
         ],
@@ -401,6 +410,7 @@ export const builtInPipelines: Record<string, PipelineSpec> = {
       {
         parallel: [
           { agent: "clean-code-auditor", name: "clean-code", models: [glmModel, kimiModel], reports: ["scope"] },
+          { agent: "over-engineering-auditor", name: "over-engineering", models: [glmModel, kimiModel], reports: ["scope"] },
           { agent: "security-reviewer", name: "security", models: [glmModel, kimiModel], reports: ["scope"] },
           { agent: "bug-auditor", name: "bugs", models: [glmModel, kimiModel], reports: ["scope"] },
         ],
@@ -415,7 +425,8 @@ export const builtInPipelines: Record<string, PipelineSpec> = {
       { agent: "bug-auditor", name: "bugs", model: fallbackModel, reports: ["scope"] },
       { agent: "clean-code-auditor", name: "clean-code", model: fallbackModel, reports: ["scope"] },
       { agent: "security-reviewer", name: "security", model: fallbackModel, reports: ["scope"] },
-      { agent: "review-adversary", name: "triage", model: defaultOpusModel, reports: ["scope", "bugs", "clean-code", "security"] },
+      { agent: "over-engineering-auditor", name: "over-engineering", model: fallbackModel, reports: ["scope"] },
+      { agent: "review-adversary", name: "triage", model: defaultOpusModel, reports: ["scope", "bugs", "clean-code", "security", "over-engineering"] },
       { agent: "review-fixer", name: "fixes", model: fallbackModel, reports: ["triage"] },
       { agent: "review-validator", name: "validator", model: fallbackModel, reports: "all" },
     ],
@@ -429,9 +440,10 @@ export const builtInPipelines: Record<string, PipelineSpec> = {
           { agent: "bug-auditor", name: "bugs", models: [sonnetModel, fallbackModel], reports: ["scope"] },
           { agent: "clean-code-auditor", name: "clean-code", models: [sonnetModel, fallbackModel], reports: ["scope"] },
           { agent: "security-reviewer", name: "security", models: [sonnetModel, fallbackModel], reports: ["scope"] },
+          { agent: "over-engineering-auditor", name: "over-engineering", models: [sonnetModel, fallbackModel], reports: ["scope"] },
         ],
       },
-      { agent: "review-adversary", name: "triage", model: defaultOpusModel, reports: ["scope", "bugs", "clean-code", "security"] },
+      { agent: "review-adversary", name: "triage", model: defaultOpusModel, reports: ["scope", "bugs", "clean-code", "security", "over-engineering"] },
       { agent: "review-fixer", name: "fixes", model: sonnetModel, reports: ["triage"] },
       { agent: "review-validator", name: "validator", model: defaultOpusModel, reports: "all" },
     ],

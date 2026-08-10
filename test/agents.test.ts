@@ -34,6 +34,16 @@ describe("opencode config", () => {
     expect(prompt).toContain("not replaceable")
   })
 
+  test("loads over-engineering-auditor prompt with taxonomy and safety guard rails", () => {
+    const prompt = loadAgentPrompt("over-engineering-auditor", "/tmp/non-existent-convoy-target")
+
+    expect(prompt).toContain("# Over-Engineering Auditor")
+    expect(prompt).toContain("N1 — YAGNI")
+    expect(prompt).toContain("V1 — Marginal")
+    expect(prompt).toContain("`yagni` — N1")
+    expect(prompt).toContain("# Convoy Runtime Safety")
+  })
+
   test("project agent prompts replace built-ins but keep runtime safety", async () => {
     const dir = await mkdtemp(join(tmpdir(), "convoy-agents-"))
     try {

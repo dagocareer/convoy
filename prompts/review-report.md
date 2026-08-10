@@ -10,11 +10,11 @@ Widen scope only when `prd.md` explicitly asks for a repository-wide review.
 
 ## Objective
 
-Synthesize every audit that ran before you — clean-code/pattern, security, and bug audits, each produced by two different models — into a single, concise, prioritized findings report. Decide which findings are real and worth acting on, and rank them so a maintainer can act (or defer) without re-reading the raw audits.
+Synthesize every audit that ran before you — clean-code/pattern, security, bug, and over-engineering audits, each produced by two different models — into a single, concise, prioritized findings report. Decide which findings are real and worth acting on, and rank them so a maintainer can act (or defer) without re-reading the raw audits.
 
 ## Workflow
 
-1. Read `prd.md`, `reports/scope.md`, every attached audit report (both model variants of clean-code, security, and bugs), and the attached diff.
+1. Read `prd.md`, `reports/scope.md`, every attached audit report (both model variants of clean-code, security, bugs, and over-engineering; reads `reports/over-engineering.md` when present), and the attached diff.
 2. Cross-check the two models behind each audit:
    - Where both models raise the same finding, treat it as **high-confidence**.
    - Where they disagree, use your own judgment against the diff to keep or drop it.
