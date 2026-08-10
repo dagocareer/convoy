@@ -446,22 +446,34 @@ describe("built-in hunter pipelines", () => {
       "hunter-reliability__openrouter-z-ai-glm-5-2",
       "hunter-supply-chain__openai-gpt-5-6-terra-xhigh",
       "hunter-supply-chain__openrouter-z-ai-glm-5-2",
+      "hunter-over-engineering__openai-gpt-5-6-terra-xhigh",
+      "hunter-over-engineering__openrouter-z-ai-glm-5-2",
       "hunter-report",
     ])
 
     const report = pipeline.steps.find((step): step is AgentStep => step.type === "agent" && step.stepName === "hunter-report")
     expect(report).toMatchObject({ model: "openai/gpt-5.6-sol", variant: "xhigh" })
-    // `reports: previous` pulls in the whole parallel group: 6 tracks x 2 models.
-    expect(report?.inputFiles.filter((file) => file.startsWith("reports/"))).toHaveLength(12)
+    // `reports: previous` pulls in the whole parallel group: 7 tracks x 2 models.
+    expect(report?.inputFiles.filter((file) => file.startsWith("reports/"))).toHaveLength(14)
   })
 
-  test("hunter-max fans all six tracks across the same five models", () => {
+  test("hunter-max fans all seven tracks across the same five models", () => {
     const pipeline = hunterMax()
     const agents = pipeline.steps.filter((step): step is AgentStep => step.type === "agent")
     const tracks = agents.filter((step) => step.stepName !== "hunter-max-report")
 
-    expect(tracks).toHaveLength(30)
-    expect(new Set(tracks.map((step) => step.stepName)).size).toBe(6)
+    expect(tracks).toHaveLength(35)
+    expect(new Set(tracks.map((step) => step.stepName))).toEqual(
+      new Set([
+        "hunter-correctness",
+        "hunter-memory",
+        "hunter-performance",
+        "hunter-security",
+        "hunter-reliability",
+        "hunter-supply-chain",
+        "hunter-over-engineering",
+      ]),
+    )
     for (const track of new Set(tracks.map((step) => step.stepName))) {
       const models = tracks.filter((step) => step.stepName === track).map((step) => `${step.model}${step.variant ? `#${step.variant}` : ""}`)
       expect(models).toEqual([
@@ -475,7 +487,7 @@ describe("built-in hunter pipelines", () => {
 
     const report = agents.find((step) => step.stepName === "hunter-max-report")
     expect(report).toMatchObject({ model: "openai/gpt-5.6-sol", variant: "xhigh" })
-    expect(report?.inputFiles.filter((file) => file.startsWith("reports/"))).toHaveLength(30)
+    expect(report?.inputFiles.filter((file) => file.startsWith("reports/"))).toHaveLength(35)
   })
 
   test("every track step attaches the diff and reads no earlier report", () => {

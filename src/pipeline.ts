@@ -28,8 +28,8 @@ export const defaultImplementerModel = solModel
 export const defaultImplementReviewModel = kimiModel
 export const defaultAdversarialModel = kimiModel
 
-/** The six specialty audit tracks shared by `hunter` and `hunter-max`; each maps to a `hunter-<track>` agent. */
-const hunterTracks = ["correctness", "memory", "performance", "security", "reliability", "supply-chain"] as const
+/** The seven specialty audit tracks shared by `hunter` and `hunter-max`; each maps to a `hunter-<track>` agent. */
+const hunterTracks = ["correctness", "memory", "performance", "security", "reliability", "supply-chain", "over-engineering"] as const
 
 /** Legacy reserved step keyword: pauses the pipeline for a manual human gate. */
 export const humanReviewStep = "human-review"
@@ -211,7 +211,7 @@ export const builtInAgents: readonly AgentSpec[] = [
     readOnly: true,
     builtIn: true,
   },
-  // hunter / hunter-max: six specialty audit tracks fanned across models, then one consensus report.
+  // hunter / hunter-max: seven specialty audit tracks fanned across models, then one consensus report.
   {
     name: "hunter-correctness",
     description: "Finds concrete functional, logic, state-management, and concurrency defects",
@@ -255,6 +255,14 @@ export const builtInAgents: readonly AgentSpec[] = [
   {
     name: "hunter-supply-chain",
     description: "Finds dependency, build, CI/CD, infrastructure, and supply-chain security defects",
+    defaultModel: fallbackModel,
+    temperature: 0.1,
+    readOnly: true,
+    builtIn: true,
+  },
+  {
+    name: "hunter-over-engineering",
+    description: "Finds over-engineering, unearned abstraction, indirection, configurability, and removable lines/dependencies",
     defaultModel: fallbackModel,
     temperature: 0.1,
     readOnly: true,
@@ -501,7 +509,7 @@ export const builtInPipelines: Record<string, PipelineSpec> = {
   },
   hunter: {
     description:
-      "Balanced report-only audit: Terra plus one specialty model on each of six audit tracks, followed by a Sol xhigh consensus report. Makes no changes.",
+      "Balanced report-only audit: Terra plus one specialty model on each of seven audit tracks, followed by a Sol xhigh consensus report. Makes no changes.",
     steps: [
       {
         parallel: [
@@ -511,6 +519,7 @@ export const builtInPipelines: Record<string, PipelineSpec> = {
           { agent: "hunter-security", models: [fallbackModel, kimiModel], reports: "none", diff: true },
           { agent: "hunter-reliability", models: [fallbackModel, glmModel], reports: "none", diff: true },
           { agent: "hunter-supply-chain", models: [fallbackModel, glmModel], reports: "none", diff: true },
+          { agent: "hunter-over-engineering", models: [fallbackModel, glmModel], reports: "none", diff: true },
         ],
       },
       { agent: "hunter-report", model: solXhighModel, reports: "previous", diff: true },
@@ -518,7 +527,7 @@ export const builtInPipelines: Record<string, PipelineSpec> = {
   },
   "hunter-max": {
     description:
-      "Maximum-coverage report-only audit: all five API models on each of six audit tracks, followed by a Sol xhigh consensus report. Makes no changes.",
+      "Maximum-coverage report-only audit: all five API models on each of seven audit tracks, followed by a Sol xhigh consensus report. Makes no changes.",
     steps: [
       { parallel: hunterMaxTracks() },
       { agent: "hunter-max-report", model: solXhighModel, reports: "previous", diff: true },
@@ -526,7 +535,7 @@ export const builtInPipelines: Record<string, PipelineSpec> = {
   },
 }
 
-/** Every hunter-max track runs the same five-model fan-out, so build the six steps instead of repeating the list. */
+/** Every hunter-max track runs the same five-model fan-out, so build the seven steps instead of repeating the list. */
 function hunterMaxTracks(): AgentStepSpec[] {
   return hunterTracks.map((track) => ({
     agent: `hunter-${track}`,

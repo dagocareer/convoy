@@ -279,8 +279,8 @@ defaults:
 #   review               report-only: parallel audits across two models plus one prioritized report (no changes)
 #   review-lite          like review, but swaps GPT 5.6 Terra xhigh for GLM 5.2 (scope + audit fan-out); report stays on Opus
 #   review-cc            like review, but pairs each audit with a Claude Code run (needs the \`claude\` CLI on PATH)
-#   hunter               report-only repo audit: six specialty tracks on two models each, then one consensus report
-#   hunter-max           like hunter, with every track fanned across all five models (30 audits — slow and expensive)
+#   hunter               report-only repo audit: seven specialty tracks on two models each, then one consensus report
+#   hunter-max           like hunter, with every track fanned across all five models (35 audits — slow and expensive)
 # The default \`implement\` pipeline is inlined below as an editable starting point; redefining a name here overrides the built-in.
 pipelines:
   implement:
