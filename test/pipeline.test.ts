@@ -206,7 +206,7 @@ describe("built-in review pipeline", () => {
     expect(pipeline.steps.some((step) => step.type === "human")).toBe(false)
   })
 
-  test("fans each audit across GPT 5.6 Terra xhigh + opus and feeds a single report step with every audit", () => {
+  test("fans each audit across GPT 5.6 Terra xhigh + opus, consolidates deferred findings into a debt ledger, and feeds every audit plus the ledger to a single report step", () => {
     const pipeline = review()
     expect(stepNames(pipeline)).toEqual([
       "scope",
@@ -218,7 +218,25 @@ describe("built-in review pipeline", () => {
       "security__anthropic-claude-opus-5",
       "bugs__openai-gpt-5-6-terra-xhigh",
       "bugs__anthropic-claude-opus-5",
+      "debt",
       "report",
+    ])
+
+    const byName = Object.fromEntries(
+      pipeline.steps.filter((step): step is AgentStep => step.type === "agent").map((step) => [step.name, step]),
+    )
+    expect(byName.debt).toMatchObject({ model: defaultOpusModel, readOnly: true })
+    expect(byName.debt?.inputFiles).toEqual([
+      "prd.md",
+      "reports/scope.md",
+      "reports/clean-code__openai-gpt-5-6-terra-xhigh.md",
+      "reports/clean-code__anthropic-claude-opus-5.md",
+      "reports/over-engineering__openai-gpt-5-6-terra-xhigh.md",
+      "reports/over-engineering__anthropic-claude-opus-5.md",
+      "reports/security__openai-gpt-5-6-terra-xhigh.md",
+      "reports/security__anthropic-claude-opus-5.md",
+      "reports/bugs__openai-gpt-5-6-terra-xhigh.md",
+      "reports/bugs__anthropic-claude-opus-5.md",
     ])
 
     const report = pipeline.steps.find((step): step is AgentStep => step.type === "agent" && step.stepName === "report")
@@ -233,6 +251,7 @@ describe("built-in review pipeline", () => {
       "reports/security__anthropic-claude-opus-5.md",
       "reports/bugs__openai-gpt-5-6-terra-xhigh.md",
       "reports/bugs__anthropic-claude-opus-5.md",
+      "reports/debt.md",
     ])
   })
 })
@@ -248,7 +267,7 @@ describe("built-in review-lite pipeline", () => {
     expect(pipeline.steps.some((step) => step.type === "human")).toBe(false)
   })
 
-  test("runs entirely on low-cost models: GLM 5.2 scopes and reports, and the fan-out pairs GLM 5.2 with Kimi K3", () => {
+  test("runs entirely on low-cost models: GLM 5.2 scopes, audits, writes the debt ledger and the report, and the fan-out pairs GLM 5.2 with Kimi K3", () => {
     const pipeline = reviewLite()
     expect(stepNames(pipeline)).toEqual([
       "scope",
@@ -260,6 +279,7 @@ describe("built-in review-lite pipeline", () => {
       "security__openrouter-moonshotai-kimi-k3",
       "bugs__openrouter-z-ai-glm-5-2",
       "bugs__openrouter-moonshotai-kimi-k3",
+      "debt",
       "report",
     ])
 
@@ -267,6 +287,7 @@ describe("built-in review-lite pipeline", () => {
       pipeline.steps.filter((step): step is AgentStep => step.type === "agent").map((step) => [step.name, step]),
     )
     expect(byName.scope?.model).toBe("openrouter/z-ai/glm-5.2")
+    expect(byName.debt?.model).toBe("openrouter/z-ai/glm-5.2")
     expect(byName.report?.model).toBe("openrouter/z-ai/glm-5.2")
     expect(byName.report?.inputFiles).toEqual([
       "prd.md",
@@ -279,6 +300,7 @@ describe("built-in review-lite pipeline", () => {
       "reports/security__openrouter-moonshotai-kimi-k3.md",
       "reports/bugs__openrouter-z-ai-glm-5-2.md",
       "reports/bugs__openrouter-moonshotai-kimi-k3.md",
+      "reports/debt.md",
     ])
   })
 
@@ -300,6 +322,7 @@ describe("built-in refine pipeline", () => {
     expect(byName["clean-code"]).toMatchObject({ model: "openai/gpt-5.6-terra", variant: "xhigh" })
     expect(byName.security).toMatchObject({ model: "openai/gpt-5.6-terra", variant: "xhigh" })
     expect(byName["over-engineering"]).toMatchObject({ model: "openai/gpt-5.6-terra", variant: "xhigh" })
+    expect(byName.debt).toMatchObject({ model: "openai/gpt-5.6-terra", variant: "xhigh" })
     expect(byName.triage).toMatchObject({ model: "anthropic/claude-opus-5" })
     expect(byName.triage.inputFiles).toEqual([
       "prd.md",
@@ -308,6 +331,7 @@ describe("built-in refine pipeline", () => {
       "reports/clean-code.md",
       "reports/security.md",
       "reports/over-engineering.md",
+      "reports/debt.md",
     ])
     expect(byName.fixes).toMatchObject({ model: "openai/gpt-5.6-terra", variant: "xhigh" })
     expect(byName.validator).toMatchObject({ model: "openai/gpt-5.6-terra", variant: "xhigh" })
@@ -332,6 +356,7 @@ describe("built-in ultra-refine pipeline", () => {
       "reports/security__openai-gpt-5-6-terra-xhigh.md",
       "reports/over-engineering__openrouter-anthropic-claude-sonnet-5.md",
       "reports/over-engineering__openai-gpt-5-6-terra-xhigh.md",
+      "reports/debt.md",
     ])
   })
 })
